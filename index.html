@@ -70,23 +70,27 @@
 </style>
 </head>
 <body>
-  <header>
-    <div class="wrap" role="banner" aria-label="Site header">
-      <div class="brand">
-        <!-- Put 'amoc-cover.png' next to this file -->
-        <img id="cover" src="amoc-cover.png" alt="AMOC Energy cover" />
-        <div>
-          <h1>ISO 14064 Carbon Footprint Calculator and Reporting platform by AMOC ENERGY</h1>
-          <div class="subtitle">&lt;By Mohamed Abd Elsalam Seuofy&gt;</div>
-          <div class="chips" style="margin-top:6px">
-            <span class="chip">Scopes 1 · 2 · 3</span>
-            <span class="chip">CSV / JSON Import</span>
-            <span class="chip">Local Autosave</span>
-          </div>
-        </div>
-      </div>
+<header>
+  <div class="wrap" role="banner" aria-label="Site header" style="text-align:center;">
+    <!-- Cover image: responsive full width -->
+    <img id="cover" src="amoc-cover.png" alt="AMOC Energy cover"
+         style="max-width:100%; height:auto; display:block; margin:0 auto;">
+
+    <h1 style="margin-top:0.5rem;">
+      ISO 14064 Carbon Footprint Calculator and Reporting platform by AMOC ENERGY
+    </h1>
+    <div class="subtitle" style="font-size:0.9rem;">
+      &lt;By Mohamed Abd Elsalam Seuofy&gt;
     </div>
-  </header>
+
+    <div class="chips" style="margin-top:6px">
+      <span class="chip">Scopes 1 · 2 · 3</span>
+      <span class="chip">CSV / JSON Import</span>
+      <span class="chip">Local Autosave</span>
+    </div>
+  </div>
+</header>
+
 
   <main class="wrap" role="main">
     <!-- ORG METADATA -->
@@ -689,4 +693,5 @@ function render(){ bindMeta(); renderItems(); renderFactors(); totals(); }
 </script>
 </body>
 </html>
+
 
