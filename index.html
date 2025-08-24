@@ -77,12 +77,12 @@
   @media print {
     *{ color:#000 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
     body{ background:#fff !important; }
-    header{ position:static; background:#fff !important; border:none; }
+    header{ position:sticky; background:#fff !important; border:none; }
     .wrap{ max-width:100%; padding:0 16px; }
     section.card{ background:#fff !important; border:none; border-radius:0; padding:8px 0 }
     .chips, .subtitle, .no-print, button, input[type=file], input[type=color], .factor-row button,
     .factor-row input[aria-label="Value"], .factor-row select, #factorForm, #itemForm, canvas { display:none !important; }
-    thead th{ position:static; background:#fff !important; }
+    thead th{ position:sticky; background:#fff !important; }
     th,td{ border-bottom:1px solid #000 !important; }
     .cover-wrap img#cover{ border:none; }
     #clientLogo{ border:1px solid #000; }
@@ -854,3 +854,4 @@ function render(){ bindMeta(); bindChecklist(); renderLogo(); renderItems(); ren
 </script>
 </body>
 </html>
+
