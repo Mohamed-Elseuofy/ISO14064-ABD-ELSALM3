@@ -18,16 +18,16 @@
   h1{margin:6px 0 0;font-weight:700;font-size:1.35rem}
   .subtitle{margin-top:4px;color:#b7c4ea;font-size:.9rem}
   .brand{display:flex;gap:16px;align-items:center;flex-wrap:wrap}
-  /* Fixed cover image (10in x 2in); responsive on small screens */
-.brand img#cover {
-  width: 100%;
-  height: auto;
-  object-fit: cover;
-  border-radius: 10px;
-  border: 1px solid var(--border);
-  background: #0d1533;
-  display: block;
-}
+  /* Cover + client logo */
+  .cover-wrap{position:relative}
+  .cover-wrap img#cover{
+    width:100%;height:auto;object-fit:cover;border-radius:10px;border:1px solid var(--border);
+    background:#0d1533;display:block;
+  }
+  #clientLogo{
+    position:absolute;right:12px;top:12px;max-width:140px;max-height:90px;display:none;
+    background:#fff;border-radius:10px;padding:6px;border:1px solid var(--border)
+  }
   .grid{display:grid;gap:16px}
   .grid-2{grid-template-columns:1fr 1fr}
   .grid-3{grid-template-columns:repeat(3,1fr)}
@@ -70,14 +70,37 @@
   .nowrap{white-space:nowrap}
   footer{color:#a7b4db}
   .sr-only{position:absolute;left:-10000px;top:auto;width:1px;height:1px;overflow:hidden}
+  .no-print{ }
+  .print-only{ display:none; }
+
+  /* ===== Print (PDF) Pro styling: white background, black text ===== */
+  @media print {
+    *{ color:#000 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    body{ background:#fff !important; }
+    header{ position:static; background:#fff !important; border:none; }
+    .wrap{ max-width:100%; padding:0 16px; }
+    section.card{ background:#fff !important; border:none; border-radius:0; padding:8px 0 }
+    .chips, .subtitle, .no-print, button, input[type=file], input[type=color], .factor-row button,
+    .factor-row input[aria-label="Value"], .factor-row select, #factorForm, #itemForm, canvas { display:none !important; }
+    thead th{ position:static; background:#fff !important; }
+    th,td{ border-bottom:1px solid #000 !important; }
+    .cover-wrap img#cover{ border:none; }
+    #clientLogo{ border:1px solid #000; }
+    .tile{ background:#fff; border:1px solid #000 }
+    .tile .val{ font-weight:700; }
+    /* Hide Actions column */
+    th.actions, td.actions{ display:none !important; }
+  }
 </style>
 </head>
 <body>
 <header>
   <div class="wrap" role="banner" aria-label="Site header" style="text-align:center;">
-    <!-- Cover image: responsive full width -->
-    <img id="cover" src="amoc-cover.png" alt="AMOC Energy cover"
-         style="max-width:100%; height:auto; display:block; margin:0 auto;">
+    <!-- Cover + client logo (appears on top-right) -->
+    <div class="cover-wrap">
+      <img id="cover" src="amoc-cover.png" alt="AMOC Energy cover">
+      <img id="clientLogo" alt="Client logo (uploaded)">
+    </div>
 
     <h1 style="margin-top:0.5rem;">
       ISO 14064 Carbon Footprint Calculator and Reporting platform by AMOC ENERGY
@@ -91,9 +114,15 @@
       <span class="chip">CSV / JSON Import</span>
       <span class="chip">Local Autosave</span>
     </div>
+
+    <!-- Client logo uploader (extra; does not affect calculations) -->
+    <div class="inline no-print" style="justify-content:center;margin-top:10px">
+      <label for="logoUpload" class="sr-only">Upload client logo</label>
+      <input id="logoUpload" type="file" accept="image/*" style="max-width:320px" />
+      <button type="button" id="removeLogo" class="ghost">Remove logo</button>
+    </div>
   </div>
 </header>
-
 
   <main class="wrap" role="main">
     <!-- ORG METADATA -->
@@ -103,6 +132,10 @@
         <div>
           <label for="orgName">Organization name</label>
           <input id="orgName" placeholder="Acme Manufacturing Ltd." />
+        </div>
+        <div>
+          <label for="orgDesc">Organization Description</label>
+          <input id="orgDesc" placeholder="Brief description of the organization" />
         </div>
         <div>
           <label for="period">Reporting period (YYYY-MM-DD to YYYY-MM-DD)</label>
@@ -144,6 +177,53 @@
       </div>
     </section>
 
+    <!-- ISO 14064-1 CHECKLIST (checkbox-only) -->
+    <section class="card" aria-labelledby="chk-h">
+      <h2 id="chk-h">ISO 14064-1 Checklist</h2>
+      <div class="grid grid-2" style="gap:18px">
+        <div>
+          <h3 class="small" style="margin:0 0 6px">1 — Define Boundaries</h3>
+          <label><input type="checkbox" id="c_org_bound"> Organizational boundaries (control or equity share)</label><br>
+          <label><input type="checkbox" id="c_rep_bound"> Reporting boundaries (direct & indirect emissions)</label>
+        </div>
+        <div>
+          <h3 class="small" style="margin:0 0 6px">2 — Identify Emissions</h3>
+          <label><input type="checkbox" id="c_list_sources"> List all GHG sources and sinks</label><br>
+          <label><input type="checkbox" id="c_all_ghg"> Include all relevant GHGs (CO₂, CH₄, N₂O, etc.)</label>
+        </div>
+        <div>
+          <h3 class="small" style="margin:0 0 6px">3 — Quantify Emissions</h3>
+          <label><input type="checkbox" id="c_collect_activity"> Collect activity data</label><br>
+          <label><input type="checkbox" id="c_apply_ef"> Apply emission factors</label><br>
+          <label><input type="checkbox" id="c_convert_co2e"> Convert to CO₂e using latest IPCC GWP</label><br>
+          <label><input type="checkbox" id="c_base_year"> Set base year and document it</label>
+        </div>
+        <div>
+          <h3 class="small" style="margin:0 0 6px">3 — Check Indirect Emissions</h3>
+          <label><input type="checkbox" id="c_imported_energy"> Imported energy (electricity, steam)</label><br>
+          <label><input type="checkbox" id="c_transport"> Transport (business travel, commuting)</label><br>
+          <label><input type="checkbox" id="c_products_services"> Products and services (upstream & downstream)</label>
+        </div>
+        <div>
+          <h3 class="small" style="margin:0 0 6px">4 — Manage Quality</h3>
+          <label><input type="checkbox" id="c_keep_records"> Keep records and calculations</label><br>
+          <label><input type="checkbox" id="c_review_accuracy"> Review data accuracy</label><br>
+          <label><input type="checkbox" id="c_assess_uncertainty"> Assess uncertainty</label>
+        </div>
+        <div>
+          <h3 class="small" style="margin:0 0 6px">5 — Report</h3>
+          <label><input type="checkbox" id="c_rpt_org_info"> Organization info</label><br>
+          <label><input type="checkbox" id="c_rpt_boundaries"> Boundaries</label><br>
+          <label><input type="checkbox" id="c_rpt_direct_indirect"> Direct and indirect emissions</label><br>
+          <label><input type="checkbox" id="c_rpt_base_year"> Base year</label><br>
+          <label><input type="checkbox" id="c_rpt_methods"> Methods used</label><br>
+          <label><input type="checkbox" id="c_rpt_uncertainty"> Uncertainty</label><br>
+          <label><input type="checkbox" id="c_rpt_verification"> Verification (Optional)</label><br>
+          <label><input type="checkbox" id="c_rpt_internal_review"> internal review</label>
+        </div>
+      </div>
+    </section>
+
     <!-- ADD LINE ITEM -->
     <section class="card" aria-labelledby="add-h">
       <h2 id="add-h">Add Activity Line Item</h2>
@@ -169,6 +249,7 @@
             <label for="unit">Activity unit</label>
             <select id="unit" required>
               <option>kWh</option><option>MWh</option>
+              <option>MMBtu</option>
               <option>litre</option><option>gallon</option>
               <option>kg</option><option>tonne</option>
               <option>km</option><option>mile</option>
@@ -226,7 +307,7 @@
           <tr>
             <th>Scope</th><th>Category</th><th class="right">Activity</th><th>Unit</th>
             <th class="right">EF (kgCO₂e/u)</th><th class="right">Emissions (tCO₂e)</th>
-            <th>Year</th><th>Source</th><th>Notes</th><th class="right">Actions</th>
+            <th>Year</th><th>Source</th><th>Notes</th><th class="right actions no-print">Actions</th>
           </tr>
         </thead>
         <tbody id="itemsBody"></tbody>
@@ -262,7 +343,9 @@
       <form id="factorForm" class="factor-row" autocomplete="off" aria-label="Add emission factor">
         <input id="f_name" placeholder="Name (e.g., Grid electricity, country…)" required />
         <select id="f_unit">
-          <option>kWh</option><option>MWh</option><option>litre</option><option>gallon</option><option>kg</option><option>tonne</option><option>km</option><option>mile</option><option>m3</option><option>unit</option>
+          <option>kWh</option><option>MWh</option><option>MMBtu</option>
+          <option>litre</option><option>gallon</option><option>kg</option><option>tonne</option>
+          <option>km</option><option>mile</option><option>m3</option><option>unit</option>
         </select>
         <input id="f_value" type="number" step="any" min="0" placeholder="EF value (kgCO₂e/u)" required />
         <input id="f_gas" placeholder="Gas / mix" />
@@ -286,13 +369,34 @@
 /* ========= State ========= */
 const storageKey = 'cf_iso14064_v1';
 const defaultFactors = [
-  // Example factors — replace with your imported list.
+  // Existing examples
   { id: uid(), name:'Electricity – generic grid', unit:'kWh', value:0.233, gas:'CO2e', gwp:'', source:'Example', year:2024 },
   { id: uid(), name:'Natural gas combustion', unit:'kWh', value:0.184, gas:'CO2e', gwp:'', source:'Example', year:2024 },
-  { id: uid(), name:'Diesel fuel (stationary/mobile)', unit:'litre', value:2.68, gas:'CO2e', gwp:'', source:'Example', year:2024 }
+  { id: uid(), name:'Diesel fuel (stationary/mobile)', unit:'litre', value:2.68, gas:'CO2e', gwp:'', source:'Example', year:2024 },
+
+  // === Added per request (Egypt / others) ===
+  { id: uid(), name:'Electricity – Egypt grid', unit:'kWh', value:0.49, gas:'CO2e', gwp:'', source:'User-provided', year:2024 },
+  { id: uid(), name:'Natural Gas (Egypt) – combustion', unit:'MMBtu', value:53.060, gas:'CO2', gwp:'', source:'User-provided', year:2024 },
+  { id: uid(), name:'Refrigerant R-22', unit:'kg', value:1960, gas:'Blend/Refrigerant', gwp:'', source:'User-provided', year:2024 },
+  { id: uid(), name:'Refrigerant R-134', unit:'kg', value:1530, gas:'Blend/Refrigerant', gwp:'', source:'User-provided', year:2024 },
+  { id: uid(), name:'Water (supply/treatment)', unit:'m3', value:0.395, gas:'CO2e', gwp:'', source:'User-provided', year:2024 }
 ];
+
 let state = {
-  meta: { orgName:'', period:'', baseYear:'', boundary:'equity', verification:'None', preparedBy:'', notes:'', method:'' },
+  meta: {
+    orgName:'', orgDesc:'', period:'', baseYear:'', boundary:'equity',
+    verification:'None', preparedBy:'', notes:'', method:'',
+    logoDataUrl:''
+  },
+  checklist:{
+    c_org_bound:false, c_rep_bound:false, c_list_sources:false, c_all_ghg:false,
+    c_collect_activity:false, c_apply_ef:false, c_convert_co2e:false, c_base_year:false,
+    c_imported_energy:false, c_transport:false, c_products_services:false,
+    c_keep_records:false, c_review_accuracy:false, c_assess_uncertainty:false,
+    c_rpt_org_info:false, c_rpt_boundaries:false, c_rpt_direct_indirect:false,
+    c_rpt_base_year:false, c_rpt_methods:false, c_rpt_uncertainty:false,
+    c_rpt_verification:false, c_rpt_internal_review:false
+  },
   items: [],
   factors: defaultFactors
 };
@@ -313,12 +417,62 @@ function resetAll(){
 }
 
 /* ========= Metadata ========= */
-const metaIds = ['orgName','period','baseYear','boundary','verification','preparedBy','notes','method'];
+const metaIds = ['orgName','orgDesc','period','baseYear','boundary','verification','preparedBy','notes','method'];
 function bindMeta(){
   metaIds.forEach(id=>{
     const el = document.getElementById(id);
     el.value = state.meta[id] || '';
     el.addEventListener('input', ()=>{ state.meta[id] = el.value; save(); });
+  });
+}
+
+/* ========= Checklist ========= */
+const checkIds = [
+  'c_org_bound','c_rep_bound','c_list_sources','c_all_ghg',
+  'c_collect_activity','c_apply_ef','c_convert_co2e','c_base_year',
+  'c_imported_energy','c_transport','c_products_services',
+  'c_keep_records','c_review_accuracy','c_assess_uncertainty',
+  'c_rpt_org_info','c_rpt_boundaries','c_rpt_direct_indirect',
+  'c_rpt_base_year','c_rpt_methods','c_rpt_uncertainty',
+  'c_rpt_verification','c_rpt_internal_review'
+];
+function bindChecklist(){
+  checkIds.forEach(id=>{
+    const el = document.getElementById(id);
+    el.checked = !!state.checklist[id];
+    el.addEventListener('change', ()=>{ state.checklist[id] = el.checked; save(); });
+  });
+}
+
+/* ========= Client Logo ========= */
+function renderLogo(){
+  const img = document.getElementById('clientLogo');
+  if(state.meta.logoDataUrl){
+    img.src = state.meta.logoDataUrl;
+    img.style.display = 'block';
+  }else{
+    img.removeAttribute('src');
+    img.style.display = 'none';
+  }
+}
+function setupLogoUpload(){
+  const up = document.getElementById('logoUpload');
+  up.addEventListener('change', async (e)=>{
+    const file = e.target.files && e.target.files[0];
+    if(!file) return;
+    if(!file.type.startsWith('image/')){ alert('Please choose an image file.'); return; }
+    const reader = new FileReader();
+    reader.onload = () => {
+      state.meta.logoDataUrl = reader.result;
+      save(); renderLogo();
+    };
+    reader.readAsDataURL(file);
+    // reset
+    e.target.value = '';
+  });
+  document.getElementById('removeLogo').addEventListener('click', ()=>{
+    state.meta.logoDataUrl = '';
+    save(); renderLogo();
   });
 }
 
@@ -365,7 +519,7 @@ function renderFactors(){
   renderFactorSelect();
 }
 function unitsOptions(sel){
-  const units = ['kWh','MWh','litre','gallon','kg','tonne','km','mile','m3','unit'];
+  const units = ['kWh','MWh','MMBtu','litre','gallon','kg','tonne','km','mile','m3','unit'];
   return units.map(u=>`<option ${u===sel?'selected':''}>${u}</option>`).join('');
 }
 function renderFactorSelect(){
@@ -531,7 +685,7 @@ function editItem(id){
   setVal('unit', it.unit); setVal('ef', it.efBase); setVal('gas', it.gas); setVal('gwp', it.gwp);
   setVal('year', it.year||''); setVal('source', it.source||''); setVal('itemNotes', it.notes||'');
   document.getElementById('factorSelect').value='';
-  state.items = state.items.filter(x=>x.id!==id); save(); render(); toast('Line loaded into form for editing');
+  state.items = state.items.filter(x=>x.id!==it.id); save(); render(); toast('Line loaded into form for editing');
 }
 function renderItems(){
   const tbody = document.getElementById('itemsBody'); tbody.innerHTML='';
@@ -551,12 +705,12 @@ function renderItems(){
       <td>${escapeHTML(it.category)}</td>
       <td class="right">${fmt(it.activity, 3)}</td>
       <td>${it.unit}</td>
-      <td class="right" title="Base EF: ${fmt(it.efBase,3)}; Gas: ${escapeHTML(it.gas||'')}; GWP: ${escapeHTML(it.gwp||'')}}">${efLabel}</td>
+      <td class="right" title="Base EF: ${fmt(it.efBase,3)}; Gas: ${escapeHTML(it.gas||'')}; GWP: ${escapeHTML(it.gwp||'')}">${efLabel}</td>
       <td class="right">${fmt(toTonnes(it.emissionsKg), 3)}</td>
       <td>${escapeHTML(it.year||'')}</td>
       <td>${escapeHTML(it.source||it.efName||'')}</td>
       <td>${escapeHTML(it.notes||'')}</td>
-      <td class="right">
+      <td class="right actions no-print">
         <button class="ghost" onclick="editItem('${it.id}')">Edit</button>
         <button class="danger" onclick="deleteItem('${it.id}')">Delete</button>
       </td>`;
@@ -607,6 +761,7 @@ function drawChart(vals){
 function exportCSV(){
   const rows = [
     ['Organization', state.meta.orgName],
+    ['OrganizationDescription', state.meta.orgDesc],
     ['Period', state.meta.period],
     ['BaseYear', state.meta.baseYear],
     ['Boundary', state.meta.boundary],
@@ -624,7 +779,7 @@ function exportCSV(){
   download('inventory.csv', csv);
 }
 function exportJSON(){
-  const payload = { meta: state.meta, items: state.items, totals: getTotalsSnapshot(), factors: state.factors };
+  const payload = { meta: state.meta, checklist: state.checklist, items: state.items, totals: getTotalsSnapshot(), factors: state.factors };
   download('inventory.json', JSON.stringify(payload,null,2));
 }
 function getTotalsSnapshot(){
@@ -690,13 +845,12 @@ function attachEvents(){
 
   document.getElementById('factorSelect').addEventListener('change', onFactorSelectChange);
   document.getElementById('gas').addEventListener('change', onGasChange);
+
+  // Logo
+  setupLogoUpload();
 }
-function render(){ bindMeta(); renderItems(); renderFactors(); totals(); }
+function render(){ bindMeta(); bindChecklist(); renderLogo(); renderItems(); renderFactors(); totals(); }
 (function boot(){ load(); attachEvents(); render(); })();
 </script>
 </body>
 </html>
-
-
-
-
